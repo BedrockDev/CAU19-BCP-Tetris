@@ -36,7 +36,7 @@
 /* Gameplay area (MAIN) */
 
 #define MAIN_X 11     // Gameplay area width
-#define MAIN_Y 23     // Gameplay area height
+#define MAIN_Y 30     // Gameplay area height
 #define MAIN_X_ADJ 3  // Gameplay area X offset
 #define MAIN_Y_ADJ 1  // Gameplay area Y offset
 #define BLOCK_COUNT 7 // Tetrimino count
@@ -425,6 +425,20 @@ void new_block(void) { //새로운 블록 생성
 	}
 }
 
+void flip_block(int dir) {
+	switch (dir) {
+	case W:
+
+		break;
+	case S:
+		break;
+	case A:
+		break;
+	case D:
+		break;
+	}
+}
+
 void check_key(void) {
 	key = 0; //키값 초기화  
 
@@ -591,20 +605,6 @@ void move_block(int dir) { //블록을 이동시킴
 			}
 		}
 		by--;
-		break;
-	}
-}
-
-void flip_block(int dir) {
-	switch (dir) {
-	case W:
-
-		break;
-	case S:
-		break;
-	case A:
-		break;
-	case D:
 		break;
 	}
 }
