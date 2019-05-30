@@ -50,129 +50,6 @@ int STATUS_Y_GOAL;  //GOAL 정보표시위치Y 좌표 저장
 int STATUS_Y_LEVEL; //LEVEL 정보표시위치Y 좌표 저장
 int STATUS_Y_SCORE; //SCORE 정보표시위치Y 좌표 저장
 
-int blocks[BLOCK_COUNT][4][4][4] = {
-	{
-		{0,0,0,0,
-		 0,1,1,0,
-		 0,1,1,0,
-		 0,0,0,0},
-		{0,0,0,0,
-		 0,1,1,0,
-		 0,1,1,0,
-		 0,0,0,0},
-		{0,0,0,0,
-		 0,1,1,0,
-		 0,1,1,0,
-		 0,0,0,0},
-		{0,0,0,0,
-		 0,1,1,0,
-		 0,1,1,0,
-		 0,0,0,0}
-	}, {
-		{0,0,0,0,
-		 0,0,0,0,
-		 1,1,1,1,
-		 0,0,0,0},
-		{0,1,0,0,
-		 0,1,0,0,
-		 0,1,0,0,
-		 0,1,0,0},
-		{0,0,0,0,
-		 0,0,0,0,
-		 1,1,1,1,
-		 0,0,0,0},
-		{0,1,0,0,
-		 0,1,0,0,
-		 0,1,0,0,
-		 0,1,0,0}
-	}, {
-		{0,0,0,0,
-		 1,1,0,0,
-		 0,1,1,0,
-		 0,0,0,0},
-		{0,0,0,0,
-		 0,0,1,0,
-		 0,1,1,0,
-		 0,1,0,0},
-		{0,0,0,0,
-		 1,1,0,0,
-		 0,1,1,0,
-		 0,0,0,0},
-		{0,0,0,0,
-		 0,0,1,0,
-		 0,1,1,0,
-		 0,1,0,0}
-	}, {
-		{0,0,0,0,
-		 0,1,1,0,
-		 1,1,0,0,
-		 0,0,0,0},
-		{0,0,0,0,
-		 1,0,0,0,
-		 1,1,0,0,
-		 0,1,0,0},
-		{0,0,0,0,
-		 0,1,1,0,
-		 1,1,0,0,
-		 0,0,0,0},
-		{0,0,0,0,
-		 1,0,0,0,
-		 1,1,0,0,
-		 0,1,0,0}
-	}, {
-		{0,0,0,0,
-		 0,0,1,0,
-		 1,1,1,0,
-		 0,0,0,0},
-		{0,0,0,0,
-		 1,1,0,0,
-		 0,1,0,0,
-		 0,1,0,0},
-		{0,0,0,0,
-		 0,0,0,0,
-		 1,1,1,0,
-		 1,0,0,0},
-		{0,0,0,0,
-		 0,1,0,0,
-		 0,1,0,0,
-		 0,1,1,0}
-	}, {
-		{0,0,0,0,
-		 1,0,0,0,
-		 1,1,1,0,
-		 0,0,0,0},
-		{0,0,0,0,
-		 0,1,0,0,
-		 0,1,0,0,
-		 1,1,0,0},
-		{0,0,0,0,
-		 0,0,0,0,
-		 1,1,1,0,
-		 0,0,1,0},
-		{0,0,0,0,
-		 0,1,1,0,
-		 0,1,0,0,
-		 0,1,0,0},
-	}, {
-		{0,0,0,0,
-		 0,1,0,0,
-		 1,1,1,0,
-		 0,0,0,0},
-		{0,0,0,0,
-		 0,1,0,0,
-		 0,1,1,0,
-		 0,1,0,0},
-		{0,0,0,0,
-		 0,0,0,0,
-		 1,1,1,0,
-		 0,1,0,0},
-		{0,0,0,0,
-		 0,1,0,0,
-		 1,1,0,0,
-		 0,1,0,0}
-	}
-}; //블록모양 저장 4*4공간에 블록을 표현 blcoks[b_type][b_rotation][i][j]로 사용
-
 int new_blocks[BLOCK_COUNT][4][4] = {
 	{0,0,0,0,
 	 0,1,1,0,
@@ -212,7 +89,7 @@ int b_rotation_x;
 int b_rotation_y;
 int b_rotation_z;
 
-int current_block[4][4] = 0;
+int current_block[4][4] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
 
 int b_type_next; //다음 블록값 저장
 
@@ -256,6 +133,12 @@ void pause(void);//게임을 일시정지시킴
 // Custom functions
 void move_block_new(int dir);
 void get_blocks(int type, int b_rotation_x, int b_rotation_y, int b_rotation_z);
+void copy_block(int* v, int* t);
+void rotate_x(int* b, int deg);
+void rotate_y(int* b, int deg);
+void rotate_z(int* b, int deg);
+//void rotate_x(int* b, int dir);
+void clear_block(int* block);
 
 void gotoxy(int x, int y) { //gotoxy함수 
 	COORD pos = { 2 * x,y };
@@ -459,7 +342,7 @@ void new_block(void) { //새로운 블록 생성
 	}
 	for (i = 1; i < 3; i++) { //게임상태표시에 다음에 나올블럭을 그림 
 		for (j = 0; j < 4; j++) {
-			if (blocks[b_type_next][0][i][j] == 1) {
+			if (new_blocks[b_type_next][i][j] == 1) {
 				gotoxy(STATUS_X_ADJ + 2 + j, i + 6);
 				printf("%c", 254);
 			}
@@ -468,20 +351,6 @@ void new_block(void) { //새로운 블록 생성
 				printf("  ");
 			}
 		}
-	}
-}
-
-void flip_block(int dir) {
-	switch (dir) {
-	case W:
-
-		break;
-	case S:
-		break;
-	case A:
-		break;
-	case D:
-		break;
 	}
 }
 
@@ -524,19 +393,19 @@ void check_key(void) {
 				break;
 			case W: // Flip up
 			case w:
-				flip_block(W);
+				if (check_crush(bx, by, b_rotation_x, (b_rotation_y + 1) % 4, b_rotation_z) == true) move_block(w);
+				//회전할 수 있는지 체크 후 가능하면 회전
+				else if (crush_on == 1 && check_crush(bx, by - 1, b_rotation_x, (b_rotation_y + 1) % 4, b_rotation_z) == true) move_block(101);
 				break;
 			case S: // Flip down
 			case s:
-				flip_block(S);
+				if (check_crush(bx, by, b_rotation_x, b_rotation_y, (b_rotation_z + 1) % 4) == true) move_block(s);
 				break;
 			case A: // Flip left
 			case a:
-				flip_block(A);
 				break;
 			case D: // Flip right
 			case d:
-				flip_block(D);
 				break;
 			case ESC: //ESC눌렀을때 
 				system("cls"); //화면을 지우고 
@@ -581,46 +450,20 @@ int check_crush(int bx, int by, int b_rotation_x, int b_rotation_y, int b_rotati
 	return true; //하나도 안겹치면 true리턴 
 };
 
-int check_crush(int bx, int by, int b_rotation_x, int b_rotation_y, int b_rotation_z) { //지정된 좌표와 회전값으로 충돌이 있는지 검사 
-	int i, j;
-
-	get_blocks(b_type, b_rotation_x, b_rotation_y, b_rotation_z);
-
-	for (i = 0; i < 4; i++) {
-		for (j = 0; j < 4; j++) { //지정된 위치의 게임판과 블럭모양을 비교해서 겹치면 false를 리턴 
-			if (current_block[i][j] == 1 && main_org[by + i][bx + j] > 0) return false;
-		}
-	}
-	return true; //하나도 안겹치면 true리턴 
-};
-
 void get_blocks(int b_type, int b_rotation_x, int b_rotation_y, int b_rotation_z) {
 	int block[4][4] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
 	// Initialize block from new_blocks array
 	copy_block(new_blocks[b_type], block);
-	
+
 	// Rotate X axis (basic rotation)
-	for (int i = 0; i < b_rotation_x; i++) {
-		rotate_x(block);
-		/*
-		if (b_rotation_x > 2) {
-			// x = 3
-			rotate_x(block, -1);
-			break;
-		}
-		else {
-			rotate_x(block, 1);
-		}
-		*/
-	}
+	rotate_x(block, b_rotation_x);
 
 	// Rotate Y axis (horizontal axis in screen)
-	for (int i = 0; i < b_rotation_y; i++) {
-		rotate_y(block);
-	}
+	rotate_y(block, b_rotation_y);
 
-	// Rotate Z axis
+	// Rotate Z axis (vertical axis in screen)
+	rotate_z(block, b_rotation_z);
 
 	// Apply rendered block to indicator
 	copy_block(block, current_block);
@@ -628,123 +471,195 @@ void get_blocks(int b_type, int b_rotation_x, int b_rotation_y, int b_rotation_z
 
 void copy_block(int* value, int* target) {
 	for (int i = 0; i < 16; i++) {
-		*(target + i) = *(value + i);
+		target[i] = value[i];
 	}
 }
 
-void rotate_x(int* block) {
-	int original[4][4];
+void rotate_x(int* block, int rotation) {
+	int original[16];
 	copy_block(block, original);
 
-	// Rotate clockwise
-	*(block + 0) = *(&original + 12);
-	*(block + 1) = *(&original + 8);
-	*(block + 2) = *(&original + 4);
-	*(block + 3) = *(&original + 0);
-	*(block + 4) = *(&original + 10);
-	*(block + 5) = *(&original + 9);
-	*(block + 6) = *(&original + 5);
-	*(block + 7) = *(&original + 1);
-	*(block + 8) = *(&original + 14);
-	*(block + 9) = *(&original + 10);
-	*(block + 10) = *(&original + 6);
-	*(block + 11) = *(&original + 2);
-	*(block + 12) = *(&original + 15);
-	*(block + 13) = *(&original + 11);
-	*(block + 14) = *(&original + 7);
-	*(block + 15) = *(&original + 3);
-}
-
-void rotate_x(int* block, int direction) {
-	int original[4][4];
-	copy_block(block, original);
-
-	if (direction == 1) {
-		// Rotate clockwise
-		*(block + 0) = *(&original + 12);
-		*(block + 1) = *(&original + 8);
-		*(block + 2) = *(&original + 4);
-		*(block + 3) = *(&original + 0);
-		*(block + 4) = *(&original + 10);
-		*(block + 5) = *(&original + 9);
-		*(block + 6) = *(&original + 5);
-		*(block + 7) = *(&original + 1);
-		*(block + 8) = *(&original + 14);
-		*(block + 9) = *(&original + 10);
-		*(block + 10) = *(&original + 6);
-		*(block + 11) = *(&original + 2);
-		*(block + 12) = *(&original + 15);
-		*(block + 13) = *(&original + 11);
-		*(block + 14) = *(&original + 7);
-		*(block + 15) = *(&original + 3);
-	}
-
-	if (direction == -1) {
-		// Rotate counterclockwise
-		*(block + 0) = *(&original + 3);
-		*(block + 1) = *(&original + 7);
-		*(block + 2) = *(&original + 11);
-		*(block + 3) = *(&original + 15);
-		*(block + 4) = *(&original + 2);
-		*(block + 5) = *(&original + 6);
-		*(block + 6) = *(&original + 10);
-		*(block + 7) = *(&original + 14);
-		*(block + 8) = *(&original + 1);
-		*(block + 9) = *(&original + 5);
-		*(block + 10) = *(&original + 9);
-		*(block + 11) = *(&original + 13);
-		*(block + 12) = *(&original + 0);
-		*(block + 13) = *(&original + 4);
-		*(block + 14) = *(&original + 8);
-		*(block + 15) = *(&original + 12);
+	switch (rotation) {
+	case 1:
+		// 90 clockwise
+		block[0] = original[12];
+		block[1] = original[8];
+		block[2] = original[4];
+		block[3] = original[0];
+		block[4] = original[13];
+		block[5] = original[9];
+		block[6] = original[5];
+		block[7] = original[1];
+		block[8] = original[14];
+		block[9] = original[10];
+		block[10] = original[6];
+		block[11] = original[2];
+		block[12] = original[15];
+		block[13] = original[11];
+		block[14] = original[7];
+		block[15] = original[3];
+		break;
+	case 2:
+		// 180
+		block[0] = original[15];
+		block[1] = original[14];
+		block[2] = original[13];
+		block[3] = original[12];
+		block[4] = original[11];
+		block[5] = original[10];
+		block[6] = original[9];
+		block[7] = original[8];
+		block[8] = original[7];
+		block[9] = original[6];
+		block[10] = original[5];
+		block[11] = original[4];
+		block[12] = original[3];
+		block[13] = original[2];
+		block[14] = original[1];
+		block[15] = original[0];
+		break;
+	case 3:
+		// 270
+		block[0] = original[3];
+		block[1] = original[7];
+		block[2] = original[11];
+		block[3] = original[15];
+		block[4] = original[2];
+		block[5] = original[6];
+		block[6] = original[10];
+		block[7] = original[14];
+		block[8] = original[1];
+		block[9] = original[5];
+		block[10] = original[9];
+		block[11] = original[13];
+		block[12] = original[0];
+		block[13] = original[4];
+		block[14] = original[8];
+		block[15] = original[12];
+		break;
 	}
 }
 
-void rotate_y(int* block) {
-	int original[4][4];
+void rotate_y(int* block, int rotation) {
+	int original[16];
 	copy_block(block, original);
 
-	int has_block[4] = 0;
 	int bottom_offset = 3;
-
-	for (int i = 0; i < 4; i++) {
-		has_block[i] = *(&original + i) || *(&original + i + 4) || *(&original + i + 8) || *(&original + i + 12);
-	}
-
 	for (int i = bottom_offset; i >= 0; i--) {
-		if (*(&original + i * 4) || *(&original + i * 4 + 1) || *(&original + i * 4 + 2) || *(&original + i * 4 + 3) == 1) {
-			// block exists on i th line
-			continue;
-		}
-		else {
+		if (original[i * 4] && original[i * 4 + 1] && original[i * 4 + 2] && original[i * 4 + 3] == 0) {
+			// empty on ith line
 			bottom_offset = i;
 		}
 	}
 
-	clear_block(block);
-
-	// Rotate clockwise (facing screen)
-	*(block + 0 + bottom_offset * 4) = 1;
-	*(block + 1 + bottom_offset * 4) = 1;
-	*(block + 2 + bottom_offset * 4) = 1;
-	*(block + 3 + bottom_offset * 4) = 1;
+	switch (rotation) {
+	case 1:
+	case 3:
+		clear_block(block);
+		for (int i = 0; i < 4; i++) {
+			block[i + bottom_offset * 4] = original[i] || original[i + 4] || original[i + 8] || original[i + 12];
+		}
+		break;
+	case 2:
+		block[0] = original[12];
+		block[1] = original[13];
+		block[2] = original[14];
+		block[3] = original[15];
+		block[4] = original[8];
+		block[5] = original[9];
+		block[6] = original[10];
+		block[7] = original[11];
+		block[8] = original[4];
+		block[9] = original[5];
+		block[10] = original[6];
+		block[11] = original[7];
+		block[12] = original[0];
+		block[13] = original[1];
+		block[14] = original[2];
+		block[15] = original[3];
+		break;
+	}
 }
 
-void rotate_z(int* block, int direction) {
+void rotate_z(int* block, int rotation) {
+	int original[16];
+	copy_block(block, original);
 
+	// clear columns
+	int column[4] = { 0,0,0,0 };
+	for (int i = 0; i < 4; i++) {
+		column[i] = original[i] || original[i + 4] || original[i + 8] || original[i + 12];
+	}
+
+	int offset;
+
+	switch (rotation) {
+	case 1:
+		// 90
+		clear_block(block);
+		if (column[2] == 0) {
+			offset = 1;
+		}
+		else if (column[3] == 0) {
+			offset = 2;
+		}
+		else {
+			offset = 3;
+		}
+
+		for (int i = 0; i < 4; i++) {
+			block[offset + i * 4] = original[i * 4] || original[i * 4 + 1] || original[i * 4 + 2] || original[i * 4 + 3];
+		}
+		break;
+	case 2:
+		block[0] = original[3];
+		block[1] = original[2];
+		block[2] = original[1];
+		block[3] = original[0];
+		block[4] = original[7];
+		block[5] = original[6];
+		block[6] = original[5];
+		block[7] = original[4];
+		block[8] = original[11];
+		block[9] = original[10];
+		block[10] = original[9];
+		block[11] = original[8];
+		block[12] = original[15];
+		block[13] = original[14];
+		block[14] = original[13];
+		block[15] = original[12];
+		break;
+	case 3:
+		// 270
+		clear_block(block);
+		if (column[1] == 0) {
+			offset = 2;
+		}
+		else if (column[0] == 0) {
+			offset = 1;
+		}
+		else {
+			offset = 0;
+		}
+
+		for (int i = 0; i < 4; i++) {
+			block[offset + i * 4] = original[i * 4] || original[i * 4 + 1] || original[i * 4 + 2] || original[i * 4 + 3];
+		}
+		break;
+	}
 }
 
 void clear_block(int* block) {
-	*(block + 0)  = 0;
-	*(block + 1)  = 0;
-	*(block + 2)  = 0;
-	*(block + 3)  = 0;
-	*(block + 4)  = 0;
-	*(block + 5)  = 0;
-	*(block + 6)  = 0;
-	*(block + 7)  = 0;
-	*(block + 8)  = 0;
-	*(block + 9)  = 0;
+	*(block + 0) = 0;
+	*(block + 1) = 0;
+	*(block + 2) = 0;
+	*(block + 3) = 0;
+	*(block + 4) = 0;
+	*(block + 5) = 0;
+	*(block + 6) = 0;
+	*(block + 7) = 0;
+	*(block + 8) = 0;
+	*(block + 9) = 0;
 	*(block + 10) = 0;
 	*(block + 11) = 0;
 	*(block + 12) = 0;
@@ -818,6 +733,40 @@ void move_block(int dir) { //블록을 이동시킴
 		}
 		break;
 
+	case w: //키보드 위쪽 눌렀을때 회전시킴. 
+		for (i = 0; i < 4; i++) { //현재좌표의 블럭을 지움  
+			for (j = 0; j < 4; j++) {
+				if (current_block[i][j] == 1) main_org[by + i][bx + j] = EMPTY;
+			}
+		}
+
+		b_rotation_y = (b_rotation_y + 1) % 4; //회전값을 1증가시킴(3에서 4가 되는 경우는 0으로 되돌림) 
+		get_blocks(b_type, b_rotation_x, b_rotation_y, b_rotation_z);
+
+		for (i = 0; i < 4; i++) { //회전된 블록을 찍음 
+			for (j = 0; j < 4; j++) {
+				if (current_block[i][j] == 1) main_org[by + i][bx + j] = ACTIVE_BLOCK;
+			}
+		}
+		break;
+
+	case s: //키보드 위쪽 눌렀을때 회전시킴. 
+		for (i = 0; i < 4; i++) { //현재좌표의 블럭을 지움  
+			for (j = 0; j < 4; j++) {
+				if (current_block[i][j] == 1) main_org[by + i][bx + j] = EMPTY;
+			}
+		}
+
+		b_rotation_z = (b_rotation_z + 1) % 4; //회전값을 1증가시킴(3에서 4가 되는 경우는 0으로 되돌림) 
+		get_blocks(b_type, b_rotation_x, b_rotation_y, b_rotation_z);
+
+		for (i = 0; i < 4; i++) { //회전된 블록을 찍음 
+			for (j = 0; j < 4; j++) {
+				if (current_block[i][j] == 1) main_org[by + i][bx + j] = ACTIVE_BLOCK;
+			}
+		}
+		break;
+
 	case 100: //블록이 바닥, 혹은 다른 블록과 닿은 상태에서 한칸위로 올려 회전이 가능한 경우 
 			  //이를 동작시키는 특수동작 
 		for (i = 0; i < 4; i++) {
@@ -836,13 +785,32 @@ void move_block(int dir) { //블록을 이동시킴
 		}
 		by--;
 		break;
+
+	case 101: //블록이 바닥, 혹은 다른 블록과 닿은 상태에서 한칸위로 올려 회전이 가능한 경우 
+			  //이를 동작시키는 특수동작 
+		for (i = 0; i < 4; i++) {
+			for (j = 0; j < 4; j++) {
+				if (current_block[i][j] == 1) main_org[by + i][bx + j] = EMPTY;
+			}
+		}
+
+		b_rotation_y = (b_rotation_y + 1) % 4;
+		get_blocks(b_type, b_rotation_x, b_rotation_y, b_rotation_z);
+
+		for (i = 0; i < 4; i++) {
+			for (j = 0; j < 4; j++) {
+				if (current_block[i][j] == 1) main_org[by + i - 1][bx + j] = ACTIVE_BLOCK;
+			}
+		}
+		by--;
+		break;
 	}
 }
 
 void check_line(void) {
 	int i, j, k, l;
 
-	int    block_amount; //한줄의 블록갯수를 저장하는 변수 
+	int block_amount; //한줄의 블록갯수를 저장하는 변수 
 	int combo = 0; //콤보갯수 저장하는 변수 지정및 초기화 
 
 	for (i = MAIN_Y - 2; i > 3;) { //i=MAIN_Y-2 : 밑쪽벽의 윗칸부터,  i>3 : 천장(3)아래까지 검사 
@@ -872,7 +840,7 @@ void check_line(void) {
 			Sleep(500);
 			score += (combo * level * 100);
 			reset_main_cpy(); //텍스트를 지우기 위해 main_cpy을 초기화.
-//(main_cpy와 main_org가 전부 다르므로 다음번 draw()호출시 게임판 전체를 새로 그리게 됨) 
+		//(main_cpy와 main_org가 전부 다르므로 다음번 draw()호출시 게임판 전체를 새로 그리게 됨) 
 		}
 		gotoxy(STATUS_X_ADJ, STATUS_Y_GOAL); printf(" GOAL  : %5d", (cnt <= 10) ? 10 - cnt : 0);
 		gotoxy(STATUS_X_ADJ, STATUS_Y_SCORE); printf("        %6d", score);
@@ -1001,7 +969,7 @@ void pause(void) { //게임 일시정지 함수
 
 	for (i = 1; i < 3; i++) { // 다음블록 그림 
 		for (j = 0; j < 4; j++) {
-			if (blocks[b_type_next][0][i][j] == 1) {
+			if (new_blocks[b_type_next][i][j] == 1) {
 				gotoxy(MAIN_X + MAIN_X_ADJ + 3 + j, i + 6);
 				printf("[]");
 			}
