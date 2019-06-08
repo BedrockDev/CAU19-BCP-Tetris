@@ -341,7 +341,7 @@ void new_block(void) { //새로운 블록 생성
 		for (j = 0; j < 4; j++) {
 			if (blocks[b_type_next][i][j] == 1) {
 				gotoxy(STATUS_X_ADJ + 2 + j, i + 6);
-				printf("%c", 254);
+				printf("%c%c", '[', ']');
 			}
 			else {
 				gotoxy(STATUS_X_ADJ + 2 + j, i + 6);
