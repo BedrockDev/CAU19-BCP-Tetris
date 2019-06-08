@@ -14,14 +14,8 @@
 #define SPACE 32 // Hard drop
 #define ESC   27 // Quit game
 
-#define w 119 // Flip up
-#define W 87
-#define s 115 // Flip down
-#define S 83
-#define a 97  // Flip left
-#define A 65
-#define d 100 // Flip right
-#define D 68 
+#define FLIP_Y 87
+#define FLIP_Z 83
 #define p 112 // Pause game
 #define P 80
 
@@ -35,9 +29,9 @@
 
 /* Gameplay area (MAIN) */
 
-#define MAIN_X 11     // Gameplay area width
-#define MAIN_Y 30     // Gameplay area height
-#define MAIN_X_ADJ 3  // Gameplay area X offset
+#define MAIN_X 12     // Gameplay area width
+#define MAIN_Y 26     // Gameplay area height
+#define MAIN_X_ADJ 2  // Gameplay area X offset
 #define MAIN_Y_ADJ 1  // Gameplay area Y offset
 #define BLOCK_COUNT 7 // Tetrimino count
 
@@ -106,6 +100,7 @@ int level; //현재 level
 int level_goal; //다음레벨로 넘어가기 위한 목표점수 
 int cnt; //현재 레벨에서 제거한 줄 수를 저장 
 int score; //현재 점수 
+int combo = 0; //콤보갯수 저장하는 변수 지정및 초기화 
 int last_score = 0; //마지막게임점수 
 int best_score = 0; //최고게임점수 
 
@@ -262,24 +257,25 @@ void reset_main_cpy(void) { //main_cpy를 초기화
 void draw_map(void) { //게임 상태 표시를 나타내는 함수  
 	int y = 3;             // level, goal, score만 게임중에 값이 바뀔수 도 있음 그 y값을 따로 저장해둠 
 						 // 그래서 혹시 게임 상태 표시 위치가 바뀌어도 그 함수에서 안바꿔도 되게.. 
-	gotoxy(STATUS_X_ADJ, STATUS_Y_LEVEL = y); printf(" LEVEL : %5d", level);
-	gotoxy(STATUS_X_ADJ, STATUS_Y_GOAL = y + 1); printf(" GOAL  : %5d", 10 - cnt);
+	gotoxy(STATUS_X_ADJ, STATUS_Y_LEVEL = y - 1); printf(" LEVEL : %5d", level);
+	gotoxy(STATUS_X_ADJ, STATUS_Y_GOAL = y); printf(" GOAL  : %5d combos", level * 2 - combo);
 	gotoxy(STATUS_X_ADJ, y + 2); printf("+-  N E X T  -+ ");
 	gotoxy(STATUS_X_ADJ, y + 3); printf("|             | ");
 	gotoxy(STATUS_X_ADJ, y + 4); printf("|             | ");
 	gotoxy(STATUS_X_ADJ, y + 5); printf("|             | ");
 	gotoxy(STATUS_X_ADJ, y + 6); printf("|             | ");
-	gotoxy(STATUS_X_ADJ, y + 7); printf("+-- -  -  - --+ ");
-	gotoxy(STATUS_X_ADJ, y + 8); printf(" Score      :");
-	gotoxy(STATUS_X_ADJ, STATUS_Y_SCORE = y + 9); printf("        %6d", score);
-	gotoxy(STATUS_X_ADJ, y + 10); printf(" Last score :");
-	gotoxy(STATUS_X_ADJ, y + 11); printf("        %6d", last_score);
-	gotoxy(STATUS_X_ADJ, y + 12); printf(" High score :");
-	gotoxy(STATUS_X_ADJ, y + 13); printf("        %6d", best_score);
-	gotoxy(STATUS_X_ADJ, y + 15); printf("  △   : Shift        SPACE : Hard Drop");
-	gotoxy(STATUS_X_ADJ, y + 16); printf("◁  ▷ : Left / Right   P   : Pause");
-	gotoxy(STATUS_X_ADJ, y + 17); printf("  ▽   : Soft Drop     ESC  : Quit");
-	gotoxy(STATUS_X_ADJ, y + 20); printf("blog.naver.com/azure0777");
+	gotoxy(STATUS_X_ADJ, y + 7); printf("+-------------+ ");
+	gotoxy(STATUS_X_ADJ, y + 9); printf(" Score      :");
+	gotoxy(STATUS_X_ADJ, STATUS_Y_SCORE = y + 10); printf("       %6d", score);
+	gotoxy(STATUS_X_ADJ, y + 11); printf(" Last score :");
+	gotoxy(STATUS_X_ADJ, y + 12); printf("       %6d", last_score);
+	gotoxy(STATUS_X_ADJ, y + 13); printf(" High score :");
+	gotoxy(STATUS_X_ADJ, y + 14); printf("       %6d", best_score);
+	gotoxy(STATUS_X_ADJ, y + 16); printf("ARROW UP  : Rotate X    SPACE: Hard Drop   W: Rotate Y");
+	gotoxy(STATUS_X_ADJ, y + 17); printf("ARROW R/L : Move        P    : Pause       S: Rotate Z");
+	gotoxy(STATUS_X_ADJ, y + 18); printf("ARROW DOWN: Soft Drop   ESC  : Quit");
+	gotoxy(STATUS_X_ADJ, y + 20); printf("Original game from azure0777");
+	gotoxy(STATUS_X_ADJ, y + 22); printf("Basic Computer Programming 04");
 }
 
 void draw_main(void) { //게임판 그리는 함수 
@@ -298,10 +294,10 @@ void draw_main(void) { //게임판 그리는 함수
 					printf("  ");
 					break;
 				case CEILLING: //천장모양 
-					printf("%c%c", 196, 196);
+					printf("%c%c", '-', '-');
 					break;
 				case WALL: //벽모양 
-					printf("%c%c", 177, 177);
+					printf("%c%c", '|', '|');
 					break;
 				case INACTIVE_BLOCK: //굳은 블럭 모양  
 					printf("[]");
@@ -391,21 +387,15 @@ void check_key(void) {
 			case p: //p(소문자) 눌렀을때 
 				pause(); //일시정지 
 				break;
-			case W: // Flip up
-			case w:
-				if (check_crush(bx, by, b_rotation_x, (b_rotation_y + 1) % 4, b_rotation_z) == true) move_block(w);
+			case FLIP_Y: // Flip up
+			case FLIP_Y + 32:
+				if (check_crush(bx, by, b_rotation_x, (b_rotation_y + 1) % 4, b_rotation_z) == true) move_block(FLIP_Y);
 				//회전할 수 있는지 체크 후 가능하면 회전
 				else if (crush_on == 1 && check_crush(bx, by - 1, b_rotation_x, (b_rotation_y + 1) % 4, b_rotation_z) == true) move_block(101);
 				break;
-			case S: // Flip down
-			case s:
-				if (check_crush(bx, by, b_rotation_x, b_rotation_y, (b_rotation_z + 1) % 4) == true) move_block(s);
-				break;
-			case A: // Flip left
-			case a:
-				break;
-			case D: // Flip right
-			case d:
+			case FLIP_Z: // Flip down
+			case FLIP_Z + 32:
+				if (check_crush(bx, by, b_rotation_x, b_rotation_y, (b_rotation_z + 1) % 4) == true) move_block(FLIP_Z);
 				break;
 			case ESC: //ESC눌렀을때 
 				system("cls"); //화면을 지우고 
@@ -733,7 +723,7 @@ void move_block(int dir) { //블록을 이동시킴
 		}
 		break;
 
-	case w: //키보드 위쪽 눌렀을때 회전시킴. 
+	case FLIP_Y: //키보드 위쪽 눌렀을때 회전시킴. 
 		for (i = 0; i < 4; i++) { //현재좌표의 블럭을 지움  
 			for (j = 0; j < 4; j++) {
 				if (current_block[i][j] == 1) main_org[by + i][bx + j] = EMPTY;
@@ -750,7 +740,7 @@ void move_block(int dir) { //블록을 이동시킴
 		}
 		break;
 
-	case s: //키보드 위쪽 눌렀을때 회전시킴. 
+	case FLIP_Z: //키보드 위쪽 눌렀을때 회전시킴. 
 		for (i = 0; i < 4; i++) { //현재좌표의 블럭을 지움  
 			for (j = 0; j < 4; j++) {
 				if (current_block[i][j] == 1) main_org[by + i][bx + j] = EMPTY;
@@ -811,7 +801,7 @@ void check_line(void) {
 	int i, j, k, l;
 
 	int block_amount; //한줄의 블록갯수를 저장하는 변수 
-	int combo = 0; //콤보갯수 저장하는 변수 지정및 초기화 
+	cnt = 0;
 
 	for (i = MAIN_Y - 2; i > 3;) { //i=MAIN_Y-2 : 밑쪽벽의 윗칸부터,  i>3 : 천장(3)아래까지 검사 
 		block_amount = 0; //블록갯수 저장 변수 초기화 
@@ -832,7 +822,16 @@ void check_line(void) {
 				}
 			}
 		}
-		else i--;
+		else { //not fill
+			i--;
+		}
+	}
+	// losing combo
+	if (combo > 1 && cnt == 0) {
+		combo = 0;
+		gotoxy(MAIN_X_ADJ + (MAIN_X / 2) - 3, MAIN_Y_ADJ + by - 2); printf("COMBO LOST!");
+		Sleep(500);
+		reset_main_cpy(); //텍스트를 지우기 위해 main_cpy을 초기화.
 	}
 	if (combo) { //줄 삭제가 있는 경우 점수와 레벨 목표를 새로 표시함  
 		if (combo > 1) { //2콤보이상인 경우 경우 보너스및 메세지를 게임판에 띄웠다가 지움 
@@ -840,9 +839,13 @@ void check_line(void) {
 			Sleep(500);
 			score += (combo * level * 100);
 			reset_main_cpy(); //텍스트를 지우기 위해 main_cpy을 초기화.
-		//(main_cpy와 main_org가 전부 다르므로 다음번 draw()호출시 게임판 전체를 새로 그리게 됨) 
+			//(main_cpy와 main_org가 전부 다르므로 다음번 draw()호출시 게임판 전체를 새로 그리게 됨) 
 		}
-		gotoxy(STATUS_X_ADJ, STATUS_Y_GOAL); printf(" GOAL  : %5d", (cnt <= 10) ? 10 - cnt : 0);
+		if (combo == 1) {
+			// losing the combo when combo <= 1
+			combo = 0;
+		}
+		gotoxy(STATUS_X_ADJ, STATUS_Y_GOAL);  printf(" GOAL  : %5d combos", (combo <= level * 2) ? level * 2 - combo : 0);
 		gotoxy(STATUS_X_ADJ, STATUS_Y_SCORE); printf("        %6d", score);
 	}
 }
@@ -850,11 +853,12 @@ void check_line(void) {
 void check_level_up(void) {
 	int i, j;
 
-	if (cnt >= 1) { //레벨별로 10줄씩 없애야함. 10줄이상 없앤 경우 
+	if (combo >= level * 2) { // new code
 		draw_main();
 		level_up_on = 1; //레벨업 flag를 띄움 
 		level += 1; //레벨을 1 올림 
-		cnt = 0; //지운 줄수 초기화   
+		cnt = 0; //지운 줄수 초기화
+		combo = 0;
 
 		for (i = 0; i < 4; i++) {
 			gotoxy(MAIN_X_ADJ + (MAIN_X / 2) - 3, MAIN_Y_ADJ + 4);
@@ -862,7 +866,7 @@ void check_level_up(void) {
 			Sleep(200);
 		}
 		reset_main_cpy(); //텍스트를 지우기 위해 main_cpy을 초기화.
-//(main_cpy와 main_org가 전부 다르므로 다음번 draw()호출시 게임판 전체를 새로 그리게 됨) 
+		//(main_cpy와 main_org가 전부 다르므로 다음번 draw()호출시 게임판 전체를 새로 그리게 됨) 
 
 		for (i = MAIN_Y - 2; i > MAIN_Y - 2 - (level - 1); i--) { //레벨업보상으로 각 레벨-1의 수만큼 아랫쪽 줄을 지워줌 
 			for (j = 1; j < MAIN_X - 1; j++) {
@@ -906,9 +910,10 @@ void check_level_up(void) {
 		}
 		level_up_on = 0; //레벨업 flag꺼줌
 
-		gotoxy(STATUS_X_ADJ, STATUS_Y_LEVEL); printf(" Level %3d", level); //레벨표시 
-		gotoxy(STATUS_X_ADJ, STATUS_Y_GOAL); printf(" Next level in %2d line(s)", 10 - cnt); // 레벨목표 표시 
-
+		//gotoxy(STATUS_X_ADJ, STATUS_Y_LEVEL); printf(" Level %3d", level); //레벨표시 
+		gotoxy(STATUS_X_ADJ, STATUS_Y_LEVEL); printf(" LEVEL : %5d", level);
+		//gotoxy(STATUS_X_ADJ, STATUS_Y_GOAL); printf(" Next level in %2d combo(s)", level * 2 - combo); // 레벨목표 표시 
+		gotoxy(STATUS_X_ADJ, STATUS_Y_GOAL);  printf(" GOAL  : %5d combos", (combo <= level * 2) ? level * 2 - combo : 0);
 	}
 }
 
