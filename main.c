@@ -5,7 +5,8 @@
 #include <stdlib.h>
 
 /* Keyboard key scan codes
- from docs https://docs.microsoft.com/en-us/previous-versions/visualstudio/visual-studio-6.0/aa299374(v=vs.60) */
+ from docs https://docs.microsoft.com/en-us/previous-versions/visualstudio/visual-studio-6.0/aa299374(v=vs.60) 
+ link above is dead, use https://keycode.info/ */
 
 #define LEFT  75 // Move left
 #define RIGHT 77 // Move right
