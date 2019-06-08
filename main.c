@@ -45,7 +45,7 @@ int STATUS_Y_GOAL;  //GOAL 정보표시위치Y 좌표 저장
 int STATUS_Y_LEVEL; //LEVEL 정보표시위치Y 좌표 저장
 int STATUS_Y_SCORE; //SCORE 정보표시위치Y 좌표 저장
 
-int new_blocks[BLOCK_COUNT][4][4] = {
+int blocks[BLOCK_COUNT][4][4] = {
 	{0,0,0,0,
 	 0,1,1,0,
 	 0,1,1,0,
@@ -339,7 +339,7 @@ void new_block(void) { //새로운 블록 생성
 	}
 	for (i = 1; i < 3; i++) { //게임상태표시에 다음에 나올블럭을 그림 
 		for (j = 0; j < 4; j++) {
-			if (new_blocks[b_type_next][i][j] == 1) {
+			if (blocks[b_type_next][i][j] == 1) {
 				gotoxy(STATUS_X_ADJ + 2 + j, i + 6);
 				printf("%c", 254);
 			}
@@ -444,8 +444,8 @@ int check_crush(int bx, int by, int b_rotation_x, int b_rotation_y, int b_rotati
 void get_blocks(int b_type, int b_rotation_x, int b_rotation_y, int b_rotation_z) {
 	int block[4][4] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
-	// Initialize block from new_blocks array
-	copy_block(new_blocks[b_type], block);
+	// Initialize block from blocks array
+	copy_block(blocks[b_type], block);
 
 	// Rotate X axis (basic rotation)
 	rotate_x(block, b_rotation_x);
@@ -975,7 +975,7 @@ void pause(void) { //게임 일시정지 함수
 
 	for (i = 1; i < 3; i++) { // 다음블록 그림 
 		for (j = 0; j < 4; j++) {
-			if (new_blocks[b_type_next][i][j] == 1) {
+			if (blocks[b_type_next][i][j] == 1) {
 				gotoxy(MAIN_X + MAIN_X_ADJ + 3 + j, i + 6);
 				printf("[]");
 			}
